@@ -1,6 +1,6 @@
-package dimstyl.annotations;
+package dimstyl.orm.annotations;
 
-import dimstyl.enums.DatabaseType;
+import dimstyl.orm.enums.DatabaseType;
 
 import java.lang.annotation.*;
 

@@ -1,4 +1,4 @@
-package dimstyl.annotations;
+package dimstyl.orm.annotations;
 
 import java.lang.annotation.*;
 

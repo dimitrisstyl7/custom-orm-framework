@@ -1,4 +1,4 @@
-package dimstyl.enums;
+package dimstyl.orm.enums;
 
 public enum DatabaseType {
 
