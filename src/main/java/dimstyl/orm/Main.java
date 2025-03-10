@@ -1,4 +1,4 @@
-package dimstyl;
+package dimstyl.orm;
 
 public class Main {
 
