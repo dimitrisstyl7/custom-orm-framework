@@ -34,7 +34,6 @@ public final class DatabaseAnnotationProcessor {
         final Database database = databaseClass.getAnnotation(Database.class);
         final String databaseName = database.name().isBlank() ? StringUtils.getDefaultName(databaseClassName) : database.name();
         final DatabaseType databaseType = database.type();
-        final ColumnTypeResolver columnTypeResolver = ColumnTypeResolverFactory.getResolver(databaseType);
 
         // Get database configuration instance
         try (final var databaseConfiguration = DatabaseConfigurationFactory.getConfiguration(databaseType)) {
@@ -42,6 +41,7 @@ public final class DatabaseAnnotationProcessor {
             databaseConfiguration.connect(databaseName);
 
             final var databaseMetadata = new DatabaseMetadata(databaseName, databaseType, new ArrayList<>());
+            final ColumnTypeResolver columnTypeResolver = ColumnTypeResolverFactory.getResolver(databaseType);
 
             // Process tables
             Stream.of(database.tables()).forEach(entityClass -> {

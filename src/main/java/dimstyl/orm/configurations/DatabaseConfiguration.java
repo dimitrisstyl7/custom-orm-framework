@@ -23,7 +23,7 @@ public interface DatabaseConfiguration extends AutoCloseable {
     }
 
     default Connection close(final Connection connection, final String databaseType)
-            throws DatabaseConnectionException, SQLException {
+            throws SQLException {
         if (connection != null && !connection.isClosed()) {
             PrintUtils.print("\n🔄️ Closing %s connection...\n", databaseType);
             connection.close();

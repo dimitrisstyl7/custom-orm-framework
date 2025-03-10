@@ -23,7 +23,7 @@ final class TableAnnotationProcessor {
             throws MissingTableAnnotationException, UnsupportedFieldTypeException {
         final String entityClassName = entityClass.getSimpleName();
 
-        // If the @Database annotation does not exist, throw MissingTableAnnotationException
+        // If the @Table annotation does not exist, throw MissingTableAnnotationException
         if (!entityClass.isAnnotationPresent(Table.class)) {
             final String message = String.format("Missing @Table annotation in class '%s'", entityClass);
             throw new MissingTableAnnotationException(message);
