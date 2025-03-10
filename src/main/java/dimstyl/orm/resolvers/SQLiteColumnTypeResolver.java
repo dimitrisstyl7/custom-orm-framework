@@ -1,5 +1,6 @@
 package dimstyl.orm.resolvers;
 
+import dimstyl.orm.enums.DatabaseType;
 import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 
 import java.lang.reflect.Field;
@@ -9,7 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
-import java.util.Optional;
 
 enum SQLiteColumnTypeResolver implements ColumnTypeResolver {
 
@@ -18,6 +18,8 @@ enum SQLiteColumnTypeResolver implements ColumnTypeResolver {
     // https://www.sqlite.org/datatype3.html#affinity_name_examples
     private final Map<Class<?>, String> TYPE_MAP = Map.ofEntries(
             Map.entry(String.class, "TEXT"),
+
+            Map.entry(Enum.class, "TEXT"),
 
             Map.entry(boolean.class, "INTEGER"),
             Map.entry(Boolean.class, "INTEGER"),
@@ -42,23 +44,11 @@ enum SQLiteColumnTypeResolver implements ColumnTypeResolver {
             Map.entry(LocalDateTime.class, "NUMERIC")
     );
 
+    private final DatabaseType DATABASE_TYPE = DatabaseType.SQLITE;
+
     @Override
     public String resolve(final Field field) throws UnsupportedFieldTypeException {
-        final String entityClassName = field.getDeclaringClass().getSimpleName();
-        final var fieldType = field.getType();
-
-        if (fieldType.isEnum()) return "TEXT";
-
-        return Optional
-                .ofNullable(TYPE_MAP.get(fieldType))
-                .orElseThrow(() -> {
-                    final String message = String.format(
-                            "Unsupported field type %s in entity class %s",
-                            fieldType,
-                            entityClassName
-                    );
-                    return new UnsupportedFieldTypeException(message);
-                });
+        return resolve(field, DATABASE_TYPE.toString(), TYPE_MAP);
     }
 
 }
