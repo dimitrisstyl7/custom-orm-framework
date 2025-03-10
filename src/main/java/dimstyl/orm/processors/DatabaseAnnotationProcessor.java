@@ -2,16 +2,15 @@ package dimstyl.orm.processors;
 
 import dimstyl.orm.annotations.Database;
 import dimstyl.orm.configurations.H2Config;
-import dimstyl.orm.exceptions.DatabaseConnectionException;
-import dimstyl.orm.exceptions.MissingDatabaseAnnotationException;
-import dimstyl.orm.exceptions.MissingTableAnnotationException;
-import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
+import dimstyl.orm.exceptions.*;
 import dimstyl.orm.metadata.DatabaseMetadata;
-import dimstyl.orm.metadata.TableMetadata;
+import dimstyl.orm.resolvers.ColumnTypeResolver;
+import dimstyl.orm.resolvers.ColumnTypeResolverFactory;
 
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
+import static dimstyl.orm.enums.DatabaseType.*;
 import static dimstyl.orm.utils.StringUtils.getDefaultName;
 
 public final class DatabaseAnnotationProcessor {
@@ -19,8 +18,8 @@ public final class DatabaseAnnotationProcessor {
     private DatabaseAnnotationProcessor() {
     }
 
-    public static DatabaseMetadata process(Class<?> databaseClass)
-            throws MissingDatabaseAnnotationException, DatabaseConnectionException, MissingTableAnnotationException, UnsupportedFieldTypeException {
+    public static DatabaseMetadata process(final Class<?> databaseClass)
+            throws MissingDatabaseAnnotationException, UnknownDatabaseTypeException, DatabaseConnectionException, MissingTableAnnotationException, UnsupportedFieldTypeException {
         final String databaseClassName = databaseClass.getName();
 
         // If the @Database annotation does not exist, throw MissingDatabaseAnnotationException
@@ -31,18 +30,29 @@ public final class DatabaseAnnotationProcessor {
 
         final Database database = databaseClass.getAnnotation(Database.class);
         final String databaseName = database.name().isBlank() ? getDefaultName(databaseClassName) : database.name();
+        ColumnTypeResolver columnTypeResolver;
 
         switch (database.type()) {
-            case H2 -> H2Config.connect(databaseName);
-            case SQLITE -> {/* TODO: */}
-            case DERBY -> {/* TODO: */}
+            case H2 -> {
+                columnTypeResolver = ColumnTypeResolverFactory.getResolver(H2);
+                H2Config.connect(databaseName);
+            }
+            case SQLITE -> {
+                columnTypeResolver = ColumnTypeResolverFactory.getResolver(SQLITE);
+                /* TODO: */
+            }
+            case DERBY -> {
+                columnTypeResolver = ColumnTypeResolverFactory.getResolver(DERBY);
+                /* TODO: */
+            }
+            default -> columnTypeResolver = ColumnTypeResolverFactory.getResolver(UNKNOWN);
         }
 
-        final DatabaseMetadata databaseMetadata = new DatabaseMetadata(databaseName, database.type(), new ArrayList<>());
+        final var databaseMetadata = new DatabaseMetadata(databaseName, database.type(), new ArrayList<>());
 
         // Tables metadata
         Stream.of(database.tables()).forEach(entityClass -> {
-            final TableMetadata tableMetadata = TableAnnotationProcessor.process(entityClass);
+            final var tableMetadata = TableAnnotationProcessor.process(entityClass, columnTypeResolver);
             databaseMetadata.addTableMetadata(tableMetadata);
         });
 
