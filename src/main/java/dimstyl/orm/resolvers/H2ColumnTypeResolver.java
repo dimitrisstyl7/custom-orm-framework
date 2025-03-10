@@ -1,5 +1,6 @@
 package dimstyl.orm.resolvers;
 
+import dimstyl.orm.enums.DatabaseType;
 import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 
 import java.lang.reflect.Field;
@@ -9,7 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Map;
-import java.util.Optional;
 
 enum H2ColumnTypeResolver implements ColumnTypeResolver {
 
@@ -18,6 +18,8 @@ enum H2ColumnTypeResolver implements ColumnTypeResolver {
     // https://h2database.com/html/datatypes.html
     private final Map<Class<?>, String> TYPE_MAP = Map.ofEntries(
             Map.entry(String.class, "VARCHAR(255)"),
+
+            Map.entry(Enum.class, "ENUM"),
 
             Map.entry(boolean.class, "BOOLEAN"),
             Map.entry(Boolean.class, "BOOLEAN"),
@@ -42,23 +44,11 @@ enum H2ColumnTypeResolver implements ColumnTypeResolver {
             Map.entry(LocalDateTime.class, "TIMESTAMP")
     );
 
+    private final DatabaseType DATABASE_TYPE = DatabaseType.H2;
+
     @Override
     public String resolve(final Field field) throws UnsupportedFieldTypeException {
-        final String entityClassName = field.getDeclaringClass().getSimpleName();
-        final var fieldType = field.getType();
-
-        if (fieldType.isEnum()) return "ENUM";
-
-        return Optional
-                .ofNullable(TYPE_MAP.get(fieldType))
-                .orElseThrow(() -> {
-                    final String message = String.format(
-                            "Unsupported field type %s in entity class %s",
-                            fieldType,
-                            entityClassName
-                    );
-                    return new UnsupportedFieldTypeException(message);
-                });
+        return resolve(field, DATABASE_TYPE.toString(), TYPE_MAP);
     }
 
 }
