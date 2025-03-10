@@ -1,7 +1,8 @@
 package dimstyl.orm.processors;
 
 import dimstyl.orm.annotations.Database;
-import dimstyl.orm.configurations.H2Config;
+import dimstyl.orm.configurations.DatabaseConfigurationFactory;
+import dimstyl.orm.enums.DatabaseType;
 import dimstyl.orm.exceptions.DatabaseConnectionException;
 import dimstyl.orm.exceptions.MissingDatabaseAnnotationException;
 import dimstyl.orm.exceptions.MissingTableAnnotationException;
@@ -9,12 +10,11 @@ import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 import dimstyl.orm.metadata.DatabaseMetadata;
 import dimstyl.orm.resolvers.ColumnTypeResolver;
 import dimstyl.orm.resolvers.ColumnTypeResolverFactory;
+import dimstyl.orm.utils.PrintUtils;
+import dimstyl.orm.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.stream.Stream;
-
-import static dimstyl.orm.enums.DatabaseType.*;
-import static dimstyl.orm.utils.StringUtils.getDefaultName;
 
 public final class DatabaseAnnotationProcessor {
 
@@ -32,34 +32,26 @@ public final class DatabaseAnnotationProcessor {
         }
 
         final Database database = databaseClass.getAnnotation(Database.class);
-        final String databaseName = database.name().isBlank() ? getDefaultName(databaseClassName) : database.name();
-        ColumnTypeResolver columnTypeResolver;
+        final String databaseName = database.name().isBlank() ? StringUtils.getDefaultName(databaseClassName) : database.name();
+        final DatabaseType databaseType = database.type();
+        final ColumnTypeResolver columnTypeResolver = ColumnTypeResolverFactory.getResolver(databaseType);
 
-        switch (database.type()) {
-            case H2 -> {
-                columnTypeResolver = ColumnTypeResolverFactory.getResolver(H2);
-                H2Config.connect(databaseName);
-            }
-            case SQLITE -> {
-                columnTypeResolver = ColumnTypeResolverFactory.getResolver(SQLITE);
-                /* TODO: */
-            }
-            case DERBY -> {
-                columnTypeResolver = ColumnTypeResolverFactory.getResolver(DERBY);
-                /* TODO: */
-            }
-            default -> columnTypeResolver = ColumnTypeResolverFactory.getResolver(UNKNOWN);
+        // Get database configuration instance
+        try (final var databaseConfiguration = DatabaseConfigurationFactory.getConfiguration(databaseType)) {
+            // Connect to the database (automatically closed after try block)
+            databaseConfiguration.connect(databaseName);
+
+            final var databaseMetadata = new DatabaseMetadata(databaseName, databaseType, new ArrayList<>());
+
+            // Process tables
+            Stream.of(database.tables()).forEach(entityClass -> {
+                PrintUtils.print("\n🔄️ Processing table '%s'...\n", entityClass.getSimpleName());
+                final var tableMetadata = TableAnnotationProcessor.process(entityClass, columnTypeResolver);
+                databaseMetadata.addTableMetadata(tableMetadata);
+            });
+
+            return databaseMetadata;
         }
-
-        final var databaseMetadata = new DatabaseMetadata(databaseName, database.type(), new ArrayList<>());
-
-        // Tables metadata
-        Stream.of(database.tables()).forEach(entityClass -> {
-            final var tableMetadata = TableAnnotationProcessor.process(entityClass, columnTypeResolver);
-            databaseMetadata.addTableMetadata(tableMetadata);
-        });
-
-        return databaseMetadata;
     }
 
 }
