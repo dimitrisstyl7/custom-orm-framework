@@ -2,7 +2,10 @@ package dimstyl.orm.processors;
 
 import dimstyl.orm.annotations.Database;
 import dimstyl.orm.configurations.H2Config;
-import dimstyl.orm.exceptions.*;
+import dimstyl.orm.exceptions.DatabaseConnectionException;
+import dimstyl.orm.exceptions.MissingDatabaseAnnotationException;
+import dimstyl.orm.exceptions.MissingTableAnnotationException;
+import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 import dimstyl.orm.metadata.DatabaseMetadata;
 import dimstyl.orm.resolvers.ColumnTypeResolver;
 import dimstyl.orm.resolvers.ColumnTypeResolverFactory;
@@ -19,7 +22,7 @@ public final class DatabaseAnnotationProcessor {
     }
 
     public static DatabaseMetadata process(final Class<?> databaseClass)
-            throws MissingDatabaseAnnotationException, UnknownDatabaseTypeException, DatabaseConnectionException, MissingTableAnnotationException, UnsupportedFieldTypeException {
+            throws MissingDatabaseAnnotationException, DatabaseConnectionException, MissingTableAnnotationException, UnsupportedFieldTypeException {
         final String databaseClassName = databaseClass.getName();
 
         // If the @Database annotation does not exist, throw MissingDatabaseAnnotationException
