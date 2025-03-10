@@ -43,7 +43,7 @@ enum SQLiteColumnTypeResolver implements ColumnTypeResolver {
     );
 
     @Override
-    public String resolve(Field field) throws UnsupportedFieldTypeException {
+    public String resolve(final Field field) throws UnsupportedFieldTypeException {
         final String entityClassName = field.getDeclaringClass().getSimpleName();
         final var fieldType = field.getType();
 

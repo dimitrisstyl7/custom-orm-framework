@@ -15,7 +15,7 @@ enum DerbyColumnTypeResolver implements ColumnTypeResolver {
     );
 
     @Override
-    public String resolve(Field field) throws UnsupportedFieldTypeException {
+    public String resolve(final Field field) throws UnsupportedFieldTypeException {
         return ""; // TODO: implement
     }
 }
