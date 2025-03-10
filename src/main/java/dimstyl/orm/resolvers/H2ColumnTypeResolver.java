@@ -1,4 +1,4 @@
-package dimstyl.orm.utils;
+package dimstyl.orm.resolvers;
 
 import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 
@@ -11,12 +11,17 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Optional;
 
-public final class H2ColumnTypeResolver {
+enum H2ColumnTypeResolver implements ColumnTypeResolver {
 
-    private static final Map<Class<?>, String> TYPE_MAP = Map.ofEntries(
+    INSTANCE;
+
+    // https://h2database.com/html/datatypes.html
+    private final Map<Class<?>, String> TYPE_MAP = Map.ofEntries(
             Map.entry(String.class, "VARCHAR(255)"),
+
             Map.entry(boolean.class, "BOOLEAN"),
             Map.entry(Boolean.class, "BOOLEAN"),
+
             Map.entry(short.class, "SMALLINT"),
             Map.entry(Short.class, "SMALLINT"),
             Map.entry(int.class, "INTEGER"),
@@ -27,6 +32,7 @@ public final class H2ColumnTypeResolver {
             Map.entry(Float.class, "REAL"),
             Map.entry(double.class, "DOUBLE"),
             Map.entry(Double.class, "DOUBLE"),
+
             Map.entry(java.sql.Date.class, "DATE"),
             Map.entry(LocalDate.class, "DATE"),
             Map.entry(Time.class, "TIME"),
@@ -36,10 +42,8 @@ public final class H2ColumnTypeResolver {
             Map.entry(LocalDateTime.class, "TIMESTAMP")
     );
 
-    private H2ColumnTypeResolver() {
-    }
-
-    public static String getH2ColumnType(final Field field) throws UnsupportedFieldTypeException {
+    @Override
+    public String resolve(Field field) throws UnsupportedFieldTypeException {
         final String entityClassName = field.getDeclaringClass().getSimpleName();
         final var fieldType = field.getType();
 
