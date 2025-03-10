@@ -4,12 +4,11 @@ import dimstyl.orm.annotations.Table;
 import dimstyl.orm.exceptions.MissingTableAnnotationException;
 import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 import dimstyl.orm.marker.Entity;
-import dimstyl.orm.metadata.ColumnMetadata;
 import dimstyl.orm.metadata.TableMetadata;
+import dimstyl.orm.resolvers.ColumnTypeResolver;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static dimstyl.orm.utils.StringUtils.getDefaultName;
@@ -19,8 +18,9 @@ final class TableAnnotationProcessor {
     private TableAnnotationProcessor() {
     }
 
-    static TableMetadata process(Class<? extends Entity> entityClass)
-            throws MissingTableAnnotationException, UnsupportedFieldTypeException { // TODO: add throws exceptions
+    static TableMetadata process(final Class<? extends Entity> entityClass,
+                                 final ColumnTypeResolver columnTypeResolver)
+            throws MissingTableAnnotationException, UnsupportedFieldTypeException {
         final String entityClassName = entityClass.getSimpleName();
 
         // If the @Database annotation does not exist, throw MissingTableAnnotationException
@@ -31,12 +31,12 @@ final class TableAnnotationProcessor {
 
         final Table table = entityClass.getAnnotation(Table.class);
         final String tableName = table.name().isBlank() ? getDefaultName(entityClassName) : table.name();
-        final TableMetadata tableMetadata = new TableMetadata(tableName, table.uniqueConstraints(), new ArrayList<>());
+        final var tableMetadata = new TableMetadata(tableName, table.uniqueConstraints(), new ArrayList<>());
 
         // Columns metadata
         final Field[] fields = entityClass.getDeclaredFields();
         Stream.of(fields).forEach(field -> {
-            final Optional<ColumnMetadata> optionalColumnMetadata = ColumnAnnotationProcessor.process(field);
+            final var optionalColumnMetadata = ColumnAnnotationProcessor.process(field, columnTypeResolver);
             optionalColumnMetadata.ifPresent(tableMetadata::addColumnMetadata);
         });
 
