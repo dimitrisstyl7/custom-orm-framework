@@ -6,12 +6,12 @@ import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 import dimstyl.orm.marker.Entity;
 import dimstyl.orm.metadata.TableMetadata;
 import dimstyl.orm.resolvers.ColumnTypeResolver;
+import dimstyl.orm.utils.PrintUtils;
+import dimstyl.orm.utils.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.stream.Stream;
-
-import static dimstyl.orm.utils.StringUtils.getDefaultName;
 
 final class TableAnnotationProcessor {
 
@@ -30,14 +30,22 @@ final class TableAnnotationProcessor {
         }
 
         final Table table = entityClass.getAnnotation(Table.class);
-        final String tableName = table.name().isBlank() ? getDefaultName(entityClassName) : table.name();
+        final String tableName = table.name().isBlank() ? StringUtils.getDefaultName(entityClassName) : table.name();
         final var tableMetadata = new TableMetadata(tableName, table.uniqueConstraints(), new ArrayList<>());
 
-        // Columns metadata
+        // Process columns
         final Field[] fields = entityClass.getDeclaredFields();
         Stream.of(fields).forEach(field -> {
-            final var optionalColumnMetadata = ColumnAnnotationProcessor.process(field, columnTypeResolver);
-            optionalColumnMetadata.ifPresent(tableMetadata::addColumnMetadata);
+            try {
+                final var optionalColumnMetadata = ColumnAnnotationProcessor.process(field, columnTypeResolver);
+                optionalColumnMetadata.ifPresent(columnMetadata -> {
+                    tableMetadata.addColumnMetadata(columnMetadata);
+                    PrintUtils.print("\t✅ Column '%s'\n", field.getName());
+                });
+            } catch (UnsupportedFieldTypeException e) {
+                PrintUtils.print("\t❌ Column '%s' ➡️ ERROR: %s\n", field.getName(), e.getMessage());
+                throw e;
+            }
         });
 
         return tableMetadata;
