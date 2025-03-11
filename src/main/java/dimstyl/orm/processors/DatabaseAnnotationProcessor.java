@@ -10,7 +10,7 @@ import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 import dimstyl.orm.metadata.DatabaseMetadata;
 import dimstyl.orm.resolvers.ColumnTypeResolver;
 import dimstyl.orm.resolvers.ColumnTypeResolverFactory;
-import dimstyl.orm.utils.PrintUtils;
+import dimstyl.orm.utils.ConsoleUtils;
 import dimstyl.orm.utils.StringUtils;
 
 import java.util.ArrayList;
@@ -45,7 +45,7 @@ public final class DatabaseAnnotationProcessor {
 
             // Process tables
             Stream.of(database.tables()).forEach(entityClass -> {
-                PrintUtils.print("\n🔄️ Processing table '%s'...\n", entityClass.getSimpleName());
+                ConsoleUtils.printFormatted("\n🔄️ Processing table '%s'...\n", entityClass.getSimpleName());
                 final var tableMetadata = TableAnnotationProcessor.process(entityClass, columnTypeResolver);
                 databaseMetadata.addTableMetadata(tableMetadata);
             });

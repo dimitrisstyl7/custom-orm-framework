@@ -1,7 +1,7 @@
 package dimstyl.orm.configurations;
 
 import dimstyl.orm.exceptions.DatabaseConnectionException;
-import dimstyl.orm.utils.PrintUtils;
+import dimstyl.orm.utils.ConsoleUtils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,19 +16,18 @@ public interface DatabaseConfiguration extends AutoCloseable {
 
     default Connection connect(final String connectionString, final String databaseType, final String databaseName)
             throws SQLException {
-        PrintUtils.print("\n🔄️ Connecting to %s database '%s'...\n", databaseType, databaseName);
+        ConsoleUtils.printFormatted("\n🔄️ Connecting to %s database '%s'...\n", databaseType, databaseName);
         final Connection connection = DriverManager.getConnection(connectionString);
-        PrintUtils.print("✅ Successfully connected to %s database '%s'.\n", databaseType, databaseName);
+        ConsoleUtils.printFormatted("✅ Successfully connected to %s database '%s'\n", databaseType, databaseName);
         return connection;
     }
 
     default Connection close(final Connection connection, final String databaseType)
             throws SQLException {
         if (connection != null && !connection.isClosed()) {
-            PrintUtils.print("\n🔄️ Closing %s connection...\n", databaseType);
+            ConsoleUtils.printFormatted("\n🔄️ Closing %s connection...\n", databaseType);
             connection.close();
-            PrintUtils.print("✅ %s connection closed.\n", databaseType);
-            PrintUtils.print("\n-----------------------------------------\n");
+            ConsoleUtils.printFormatted("✅ %s connection closed\n", databaseType);
             return null;
         }
         return connection;

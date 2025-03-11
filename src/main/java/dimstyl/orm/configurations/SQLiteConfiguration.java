@@ -2,7 +2,7 @@ package dimstyl.orm.configurations;
 
 import dimstyl.orm.enums.DatabaseType;
 import dimstyl.orm.exceptions.DatabaseConnectionException;
-import dimstyl.orm.utils.PrintUtils;
+import dimstyl.orm.utils.ConsoleUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,7 +30,7 @@ enum SQLiteConfiguration implements DatabaseConfiguration {
             final String connectionString = String.format("jdbc:sqlite:./db/sqlite/%s.db", databaseName);
             connection = connect(connectionString, DATABASE_TYPE.toString(), databaseName);
         } catch (SQLException | IOException e) {
-            PrintUtils.print("\n⚠️ Could not connect to SQLite database '%s': %s.\n", databaseName, e.getMessage());
+            ConsoleUtils.printFormatted("\n⚠️ Could not connect to SQLite database '%s': %s.\n", databaseName, e.getMessage());
             throw new DatabaseConnectionException(e.getMessage(), e);
         }
     }
@@ -40,7 +40,7 @@ enum SQLiteConfiguration implements DatabaseConfiguration {
         try {
             connection = close(connection, DATABASE_TYPE.toString());
         } catch (SQLException e) {
-            PrintUtils.print("⚠️ Could not close connection: %s\n", e.getMessage());
+            ConsoleUtils.printFormatted("⚠️ Could not close connection: %s\n", e.getMessage());
             throw new DatabaseConnectionException(e.getMessage(), e);
         }
     }

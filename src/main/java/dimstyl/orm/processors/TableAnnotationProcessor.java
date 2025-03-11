@@ -6,7 +6,7 @@ import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 import dimstyl.orm.marker.Entity;
 import dimstyl.orm.metadata.TableMetadata;
 import dimstyl.orm.resolvers.ColumnTypeResolver;
-import dimstyl.orm.utils.PrintUtils;
+import dimstyl.orm.utils.ConsoleUtils;
 import dimstyl.orm.utils.StringUtils;
 
 import java.lang.reflect.Field;
@@ -40,10 +40,10 @@ final class TableAnnotationProcessor {
                 final var optionalColumnMetadata = ColumnAnnotationProcessor.process(field, columnTypeResolver);
                 optionalColumnMetadata.ifPresent(columnMetadata -> {
                     tableMetadata.addColumnMetadata(columnMetadata);
-                    PrintUtils.print("\t✅ Column '%s'\n", field.getName());
+                    ConsoleUtils.printFormatted("\t✅ Column '%s'\n", field.getName());
                 });
             } catch (UnsupportedFieldTypeException e) {
-                PrintUtils.print("\t❌ Column '%s' ➡️ ERROR: %s\n", field.getName(), e.getMessage());
+                ConsoleUtils.printFormatted("\t❌ Column '%s' ➡️ ERROR: %s\n", field.getName(), e.getMessage());
                 throw e;
             }
         });

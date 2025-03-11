@@ -2,7 +2,7 @@ package dimstyl.orm.configurations;
 
 import dimstyl.orm.enums.DatabaseType;
 import dimstyl.orm.exceptions.DatabaseConnectionException;
-import dimstyl.orm.utils.PrintUtils;
+import dimstyl.orm.utils.ConsoleUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,7 +21,7 @@ enum H2Configuration implements DatabaseConfiguration {
             final String connectionString = "jdbc:h2:./db/h2/" + databaseName;
             connection = connect(connectionString, DATABASE_TYPE.toString(), databaseName);
         } catch (SQLException e) {
-            PrintUtils.print("\n⚠️ Could not connect to H2 database '%s': %s.\n", databaseName, e.getMessage());
+            ConsoleUtils.printFormatted("\n⚠️ Could not connect to H2 database '%s': %s.\n", databaseName, e.getMessage());
             throw new DatabaseConnectionException(e.getMessage(), e);
         }
     }
@@ -31,7 +31,7 @@ enum H2Configuration implements DatabaseConfiguration {
         try {
             connection = close(connection, DATABASE_TYPE.toString());
         } catch (SQLException e) {
-            PrintUtils.print("⚠️ Could not close connection: %s\n", e.getMessage());
+            ConsoleUtils.printFormatted("⚠️ Could not close connection: %s\n", e.getMessage());
             throw new DatabaseConnectionException(e.getMessage(), e);
         }
     }
