@@ -1,7 +1,7 @@
 package dimstyl.orm.processors;
 
 import dimstyl.orm.annotations.Database;
-import dimstyl.orm.configurations.DatabaseConfigurationFactory;
+import dimstyl.orm.configuration.DatabaseConfigurationFactory;
 import dimstyl.orm.enums.DatabaseType;
 import dimstyl.orm.exceptions.DatabaseConnectionException;
 import dimstyl.orm.exceptions.MissingDatabaseAnnotationException;
