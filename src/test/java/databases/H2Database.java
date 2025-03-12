@@ -2,13 +2,13 @@ package databases;
 
 import dimstyl.orm.annotations.Database;
 import dimstyl.orm.enums.DatabaseType;
-import entities.Order;
-import entities.User;
+import entities.Customer;
+import entities.Purchase;
 
 @Database(
         name = "db_2",
         type = DatabaseType.H2,
-        tables = {Order.class, User.class}
+        tables = {Purchase.class, Customer.class}
 )
 public class H2Database {
 }

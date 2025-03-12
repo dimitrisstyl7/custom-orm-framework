@@ -7,8 +7,8 @@ import dimstyl.orm.marker.Entity;
 
 import java.util.Date;
 
-@Table(name = "user")
-public class User implements Entity {
+@Table(name = "customer")
+public class Customer implements Entity {
 
     @PrimaryKey
     @Column(nullable = false, unique = true)
@@ -17,7 +17,7 @@ public class User implements Entity {
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(nullable = false)
+    @Column
     private String lastName;
 
     @Column(unique = true, nullable = false)

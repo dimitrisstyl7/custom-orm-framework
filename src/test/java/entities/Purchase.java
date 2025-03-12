@@ -8,8 +8,8 @@ import dimstyl.orm.marker.Entity;
 
 import java.time.LocalDateTime;
 
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"userId", "createdAt"}))
-public class Order implements Entity {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "created_at"}))
+public class Purchase implements Entity {
 
     @PrimaryKey
     @Column(nullable = false)
