@@ -17,9 +17,9 @@ enum DerbyColumnTypeResolver implements ColumnTypeResolver {
 
     // https://db.apache.org/derby/docs/10.2/ref/crefsqlj31068.html
     private final Map<Class<?>, String> TYPE_MAP = Map.ofEntries(
-            Map.entry(String.class, "VARCHAR"),
+            Map.entry(String.class, "VARCHAR(255)"),
 
-            Map.entry(Enum.class, "VARCHAR"),
+            Map.entry(Enum.class, "VARCHAR(255)"),
 
             Map.entry(boolean.class, "SMALLINT"),
             Map.entry(Boolean.class, "SMALLINT"),
