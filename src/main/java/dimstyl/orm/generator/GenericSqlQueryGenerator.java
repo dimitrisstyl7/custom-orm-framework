@@ -40,8 +40,8 @@ public enum GenericSqlQueryGenerator implements SqlQueryGenerator {
             };
 
             final String fileName = String.format(fileNamePlaceholder, "create_tables.sql");
-            final String fullPath = FileUtils.writeToFileAndGetPath(fileName, createTableQueries);
-            ConsoleUtils.printFormatted("\n💾 SQL script saved to '%s'\n", fullPath);
+            final String absolutePath = FileUtils.writeToFileAndGetAbsolutePath(fileName, createTableQueries);
+            ConsoleUtils.printFormatted("\n💾 SQL script saved to '%s'\n", absolutePath);
         } catch (IOException e) {
             ConsoleUtils.printFormatted("\n⚠️ Failed to write SQL create table queries to a file\n\tERROR: %s\n", e.getMessage());
         }
