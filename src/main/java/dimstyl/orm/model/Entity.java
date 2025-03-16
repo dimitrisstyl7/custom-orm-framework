@@ -1,4 +1,4 @@
-package dimstyl.orm.marker;
+package dimstyl.orm.model;
 
 public interface Entity {
 }
