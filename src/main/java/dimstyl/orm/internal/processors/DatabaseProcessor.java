@@ -1,27 +1,26 @@
-package dimstyl.orm.processors;
+package dimstyl.orm.internal.processors;
 
 import dimstyl.orm.annotations.Database;
 import dimstyl.orm.configuration.DatabaseConfigurationFactory;
-import dimstyl.orm.enums.DatabaseType;
+import dimstyl.orm.enums.DatabaseEngine;
+import dimstyl.orm.enums.SqlOperation;
 import dimstyl.orm.exceptions.DatabaseConnectionException;
 import dimstyl.orm.exceptions.MissingDatabaseAnnotationException;
 import dimstyl.orm.exceptions.MissingTableAnnotationException;
 import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
+import dimstyl.orm.internal.utils.ConsoleUtils;
+import dimstyl.orm.internal.utils.StringUtils;
 import dimstyl.orm.metadata.DatabaseMetadata;
-import dimstyl.orm.resolvers.ColumnTypeResolver;
-import dimstyl.orm.resolvers.ColumnTypeResolverFactory;
-import dimstyl.orm.utils.ConsoleUtils;
-import dimstyl.orm.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
-public final class DatabaseAnnotationProcessor {
+public final class DatabaseProcessor {
 
-    private DatabaseAnnotationProcessor() {
+    private DatabaseProcessor() {
     }
 
-    public static DatabaseMetadata process(final Class<?> databaseClass)
+    public static DatabaseMetadata extractMetadata(final Class<?> databaseClass)
             throws MissingDatabaseAnnotationException, DatabaseConnectionException, MissingTableAnnotationException, UnsupportedFieldTypeException {
         final String databaseClassName = databaseClass.getName();
 
@@ -31,22 +30,21 @@ public final class DatabaseAnnotationProcessor {
             throw new MissingDatabaseAnnotationException(message);
         }
 
-        final Database database = databaseClass.getAnnotation(Database.class);
+        final Database database = databaseClass.getDeclaredAnnotation(Database.class);
         final String databaseName = database.name().isBlank() ? StringUtils.getDefaultName(databaseClassName) : database.name();
-        final DatabaseType databaseType = database.type();
+        final DatabaseEngine databaseEngine = database.engine();
+        final SqlOperation sqlOperation = SqlOperation.CREATE_TABLE;
+        final var databaseMetadata =
+                new DatabaseMetadata(databaseName, databaseEngine, sqlOperation, new ArrayList<>());
 
-        // Get database configuration instance
-        try (final var databaseConfiguration = DatabaseConfigurationFactory.getConfiguration(databaseType)) {
-            // Connect to the database (automatically closed after try block)
-            databaseConfiguration.connect(databaseName);
-
-            final var databaseMetadata = new DatabaseMetadata(databaseName, databaseType, new ArrayList<>());
-            final ColumnTypeResolver columnTypeResolver = ColumnTypeResolverFactory.getResolver(databaseType);
+        try (final var databaseConfiguration = DatabaseConfigurationFactory.getConfiguration(databaseEngine)) {
+            // Connect to the database
+            databaseConfiguration.connect(databaseName, sqlOperation);
 
             // Process tables
             Stream.of(database.tables()).forEach(entityClass -> {
                 ConsoleUtils.printFormatted("\n🔄️ Processing table '%s'...\n", entityClass.getSimpleName());
-                final var tableMetadata = TableAnnotationProcessor.process(entityClass, columnTypeResolver);
+                final var tableMetadata = TableProcessor.extractMetadata(entityClass, databaseEngine);
                 databaseMetadata.addTableMetadata(tableMetadata);
             });
 
