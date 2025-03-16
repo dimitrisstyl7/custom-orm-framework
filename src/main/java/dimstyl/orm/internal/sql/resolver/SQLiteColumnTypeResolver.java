@@ -1,14 +1,9 @@
-package dimstyl.orm.resolvers;
+package dimstyl.orm.internal.sql.resolver;
 
-import dimstyl.orm.enums.DatabaseType;
+import dimstyl.orm.enums.DatabaseEngine;
 import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 
 import java.lang.reflect.Field;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Map;
 
 enum SQLiteColumnTypeResolver implements ColumnTypeResolver {
@@ -18,8 +13,6 @@ enum SQLiteColumnTypeResolver implements ColumnTypeResolver {
     // https://www.sqlite.org/datatype3.html#affinity_name_examples
     private final Map<Class<?>, String> TYPE_MAP = Map.ofEntries(
             Map.entry(String.class, "TEXT"),
-
-            Map.entry(Enum.class, "TEXT"),
 
             Map.entry(boolean.class, "INTEGER"),
             Map.entry(Boolean.class, "INTEGER"),
@@ -33,18 +26,10 @@ enum SQLiteColumnTypeResolver implements ColumnTypeResolver {
             Map.entry(float.class, "REAL"),
             Map.entry(Float.class, "REAL"),
             Map.entry(double.class, "REAL"),
-            Map.entry(Double.class, "REAL"),
-
-            Map.entry(java.sql.Date.class, "NUMERIC"),
-            Map.entry(LocalDate.class, "NUMERIC"),
-            Map.entry(Time.class, "NUMERIC"),
-            Map.entry(LocalTime.class, "NUMERIC"),
-            Map.entry(Timestamp.class, "NUMERIC"),
-            Map.entry(java.util.Date.class, "NUMERIC"),
-            Map.entry(LocalDateTime.class, "NUMERIC")
+            Map.entry(Double.class, "REAL")
     );
 
-    private final DatabaseType DATABASE_TYPE = DatabaseType.SQLITE;
+    private final DatabaseEngine DATABASE_TYPE = DatabaseEngine.SQLITE;
 
     @Override
     public String resolve(final Field field) throws UnsupportedFieldTypeException {

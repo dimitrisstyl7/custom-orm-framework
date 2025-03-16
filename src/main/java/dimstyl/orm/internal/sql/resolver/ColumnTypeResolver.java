@@ -1,4 +1,4 @@
-package dimstyl.orm.resolvers;
+package dimstyl.orm.internal.sql.resolver;
 
 import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 
@@ -15,13 +15,11 @@ public interface ColumnTypeResolver {
         final String entityClassName = field.getDeclaringClass().getSimpleName();
         final var fieldType = field.getType();
 
-        if (fieldType.isEnum()) return typeMap.get(Enum.class);
-
         return Optional
                 .ofNullable(typeMap.get(fieldType))
                 .orElseThrow(() -> {
                     final String message = String.format(
-                            "Unsupported field type '%s' in entity class '%s'\n%s",
+                            "Unsupported field type '%s' in entityClass class '%s'\n%s",
                             fieldType,
                             entityClassName,
                             getSupportedDataTypes(databaseType, typeMap)

@@ -1,14 +1,9 @@
-package dimstyl.orm.resolvers;
+package dimstyl.orm.internal.sql.resolver;
 
-import dimstyl.orm.enums.DatabaseType;
+import dimstyl.orm.enums.DatabaseEngine;
 import dimstyl.orm.exceptions.UnsupportedFieldTypeException;
 
 import java.lang.reflect.Field;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Map;
 
 enum DerbyColumnTypeResolver implements ColumnTypeResolver {
@@ -18,8 +13,6 @@ enum DerbyColumnTypeResolver implements ColumnTypeResolver {
     // https://db.apache.org/derby/docs/10.2/ref/crefsqlj31068.html
     private final Map<Class<?>, String> TYPE_MAP = Map.ofEntries(
             Map.entry(String.class, "VARCHAR(255)"),
-
-            Map.entry(Enum.class, "VARCHAR(255)"),
 
             Map.entry(boolean.class, "SMALLINT"),
             Map.entry(Boolean.class, "SMALLINT"),
@@ -33,18 +26,10 @@ enum DerbyColumnTypeResolver implements ColumnTypeResolver {
             Map.entry(float.class, "REAL"),
             Map.entry(Float.class, "REAL"),
             Map.entry(double.class, "DOUBLE"),
-            Map.entry(Double.class, "DOUBLE"),
-
-            Map.entry(java.sql.Date.class, "DATE"),
-            Map.entry(LocalDate.class, "DATE"),
-            Map.entry(Time.class, "TIME"),
-            Map.entry(LocalTime.class, "TIME"),
-            Map.entry(Timestamp.class, "TIMESTAMP"),
-            Map.entry(java.util.Date.class, "TIMESTAMP"),
-            Map.entry(LocalDateTime.class, "TIMESTAMP")
+            Map.entry(Double.class, "DOUBLE")
     );
 
-    private final DatabaseType DATABASE_TYPE = DatabaseType.DERBY;
+    private final DatabaseEngine DATABASE_TYPE = DatabaseEngine.DERBY;
 
     @Override
     public String resolve(final Field field) throws UnsupportedFieldTypeException {
