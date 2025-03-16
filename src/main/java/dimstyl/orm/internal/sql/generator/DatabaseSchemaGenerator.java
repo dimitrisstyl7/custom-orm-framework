@@ -1,30 +1,29 @@
-package dimstyl.orm.generator;
+package dimstyl.orm.internal.sql.generator;
 
 import dimstyl.orm.annotations.UniqueConstraint;
-import dimstyl.orm.enums.DatabaseType;
+import dimstyl.orm.enums.DatabaseEngine;
 import dimstyl.orm.exceptions.InvalidColumnNameException;
+import dimstyl.orm.internal.utils.ConsoleUtils;
+import dimstyl.orm.internal.utils.FileUtils;
 import dimstyl.orm.metadata.ColumnMetadata;
 import dimstyl.orm.metadata.DatabaseMetadata;
 import dimstyl.orm.metadata.TableMetadata;
-import dimstyl.orm.utils.ConsoleUtils;
-import dimstyl.orm.utils.FileUtils;
 
 import java.io.IOException;
 import java.util.*;
 
-public enum GenericSqlQueryGenerator implements SqlQueryGenerator {
+public enum DatabaseSchemaGenerator implements SqlQueryGenerator<List<String>, DatabaseMetadata> {
 
     INSTANCE;
 
     @Override
-    public List<String> generateDatabaseSchema(final DatabaseMetadata databaseMetadata)
-            throws InvalidColumnNameException {
+    public List<String> generate(final DatabaseMetadata databaseMetadata) throws InvalidColumnNameException {
         final StringBuilder createTableQueriesBuilder = new StringBuilder();
-        final DatabaseType databaseType = databaseMetadata.databaseType();
+        final DatabaseEngine databaseEngine = databaseMetadata.databaseEngine();
 
-        ConsoleUtils.printFormatted("\n🔄️ Generating SQL create table queries...\n");
+        ConsoleUtils.printFormatted("\n🔄️ Generating SQL 'CREATE TABLE' queries...\n");
         databaseMetadata.tableMetadataList().forEach(tableMetadata -> {
-            final String createTableQuery = generateCreateTableQuery(tableMetadata, databaseType);
+            final String createTableQuery = generateCreateTableQuery(tableMetadata, databaseEngine);
             ConsoleUtils.printFormatted("\t✅ Created query for table '%s'\n", tableMetadata.tableName());
             createTableQueriesBuilder.append(createTableQuery).append("\n\n");
         });
@@ -33,7 +32,7 @@ public enum GenericSqlQueryGenerator implements SqlQueryGenerator {
 
         // Save the generated SQL "CREATE TABLE" queries to a file specific to the database type
         try {
-            final String fileNamePlaceholder = switch (databaseType) {
+            final String fileNamePlaceholder = switch (databaseEngine) {
                 case H2 -> "db/h2/%s";
                 case SQLITE -> "db/sqlite/%s";
                 case DERBY -> "db/derby/%s";
@@ -43,7 +42,7 @@ public enum GenericSqlQueryGenerator implements SqlQueryGenerator {
             final String absolutePath = FileUtils.writeToFileAndGetAbsolutePath(fileName, createTableQueries);
             ConsoleUtils.printFormatted("\n💾 SQL script saved to '%s'\n", absolutePath);
         } catch (IOException e) {
-            ConsoleUtils.printFormatted("\n⚠️ Failed to write SQL create table queries to a file\n\tERROR: %s\n", e.getMessage());
+            ConsoleUtils.printFormatted("\n⚠️ Failed to write SQL 'CREATE TABLE' queries to a file\n\tERROR: %s\n", e.getMessage());
         }
 
         return Arrays.stream(createTableQueries.split(";"))
@@ -52,11 +51,11 @@ public enum GenericSqlQueryGenerator implements SqlQueryGenerator {
                 .toList();
     }
 
-    private String generateCreateTableQuery(final TableMetadata tableMetadata, final DatabaseType databaseType)
+    private String generateCreateTableQuery(final TableMetadata tableMetadata, final DatabaseEngine databaseEngine)
             throws InvalidColumnNameException {
         final String tableName = tableMetadata.tableName();
         final StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append(databaseType != DatabaseType.DERBY ?
+        sqlBuilder.append(databaseEngine != DatabaseEngine.DERBY ?
                 String.format("CREATE TABLE IF NOT EXISTS %s (\n", tableName) :
                 String.format("CREATE TABLE %s (\n", tableName)
         );
@@ -87,11 +86,10 @@ public enum GenericSqlQueryGenerator implements SqlQueryGenerator {
                     column.nullable() ? "" : " NOT NULL",
                     column.unique() && !column.primaryKey() ? " UNIQUE" : ""
             );
+
             columnDefinitions.add(columnDefinition);
-
-            if (column.primaryKey()) primaryKeys.add(column.columnName());
-
             tableColumnNames.add(column.columnName());
+            if (column.primaryKey()) primaryKeys.add(column.columnName());
         }
 
         // Join column definitions
