@@ -1,4 +1,4 @@
-package dimstyl.orm.utils;
+package dimstyl.orm.internal.utils;
 
 import java.io.File;
 import java.io.FileWriter;
