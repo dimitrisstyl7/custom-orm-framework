@@ -1,9 +1,10 @@
 package dimstyl.orm.configuration;
 
 import dimstyl.orm.enums.DatabaseEngine;
+import dimstyl.orm.enums.SqlOperation;
 import dimstyl.orm.exceptions.DatabaseConnectionException;
-import dimstyl.orm.utils.ConsoleUtils;
-import lombok.RequiredArgsConstructor;
+import dimstyl.orm.internal.utils.ConsoleUtils;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,19 +14,21 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-@RequiredArgsConstructor
-class GenericDatabaseConfiguration implements DatabaseConfiguration {
+enum GenericDatabaseConfiguration implements DatabaseConfiguration {
 
+    INSTANCE;
+
+    @Setter
     private DatabaseEngine databaseEngine;
     private Connection connection = null;
 
     @Override
-    public void connect(String databaseName) throws DatabaseConnectionException {
+    public void connect(final String databaseName, final SqlOperation sqlOperation) throws DatabaseConnectionException {
         try {
             ConsoleUtils.printFormatted("\n🔄️ Connecting to %s database '%s'...\n", databaseEngine, databaseName);
             if (isConnected()) return;
-            final String connectionString = buildConnectionString(databaseName);
             if (databaseEngine == DatabaseEngine.SQLITE) ensureDirectoryExists("./db/sqlite");
+            final String connectionString = buildConnectionString(databaseName, sqlOperation);
             connection = DriverManager.getConnection(connectionString);
             ConsoleUtils.printFormatted("✅ Connection established successfully\n");
         } catch (SQLException | IOException e) {
@@ -55,6 +58,11 @@ class GenericDatabaseConfiguration implements DatabaseConfiguration {
         return connection;
     }
 
+    private void validateConnection() throws DatabaseConnectionException {
+        if (!isConnected())
+            throw new DatabaseConnectionException("Database connection is either not established or has been closed.");
+    }
+
     private boolean isConnected() {
         try {
             return connection != null && !connection.isClosed();
@@ -63,16 +71,17 @@ class GenericDatabaseConfiguration implements DatabaseConfiguration {
         }
     }
 
-    private void validateConnection() throws DatabaseConnectionException {
-        if (!isConnected())
-            throw new DatabaseConnectionException("Database connection is either not established or has been closed.");
-    }
-
-    private String buildConnectionString(final String databaseName) {
-        return switch (databaseType) {
-            case DERBY -> String.format("jdbc:derby:./db/derby/%s;create=true", databaseName);
-            case SQLITE -> String.format("jdbc:sqlite:./db/sqlite/%s.db", databaseName);
-            case H2 -> "jdbc:h2:./db/h2/" + databaseName;
+    private String buildConnectionString(final String databaseName, final SqlOperation sqlOperation) {
+        String projectRoot = Paths.get("").toAbsolutePath().toString();
+        return switch (databaseEngine) {
+            case DERBY -> String.format(
+                    "jdbc:derby:%s/db/derby/%s.db%s",
+                    projectRoot,
+                    databaseName,
+                    sqlOperation == SqlOperation.CREATE_TABLE ? ";create=true" : ""
+            );
+            case SQLITE -> String.format("jdbc:sqlite:%s/db/sqlite/%s.db", projectRoot, databaseName);
+            case H2 -> String.format("jdbc:h2:%s/db/h2/%s", projectRoot, databaseName);
         };
     }
 
