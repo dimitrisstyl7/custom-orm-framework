@@ -8,7 +8,8 @@
 **Project Completion Year**: 2025
 
 ## Description
-Custom ORM Framework is a lightweight Object-Relational Mapping (ORM) library for Java that utilizes annotations and reflection to automatically inject database-related code. This framework simplifies database interactions by allowing developers to define entities, primary keys, constraints, and queries using Java annotations.
+Custom ORM Framework is a lightweight Object-Relational Mapping (ORM) solution for Java that uses annotations and reflection to automatically inject database-related code.
+This project aims to demonstrate how ORM and reflection work together by allowing developers to define entities, primary keys, constraints, and queries using Java annotations.
 
 Supported database engines:
 - **Apache Derby**
