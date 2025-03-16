@@ -22,8 +22,30 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * Abstract test class for CRUD (Create, Read, Update, Delete) operations using ORM-based repository processing.
+ * <p>
+ * This class provides utility methods for seeding and deleting test data,
+ * retrieving all records from a repository, and deleting records by ID.
+ * </p>
+ * <p><strong>Note:</strong> This class only supports read and delete operations.
+ * Create and update operations are not implemented.</p>
+ *
+ * @see RepositoryProcessor
+ * @see SqlQueryGenerator
+ * @see SqlQueryExecutor
+ * @see DatabaseConfigurationFactory
+ */
 abstract class AbstractCrudTest extends AbstractTest {
 
+    /**
+     * Seeds the database with test data using an SQL script.
+     *
+     * @param databaseName   The name of the database.
+     * @param databaseEngine The {@link DatabaseEngine} to be used.
+     * @throws IOException  If an error occurs while reading the SQL script file.
+     * @throws SQLException If an error occurs while executing SQL queries.
+     */
     static void seedData(final String databaseName, final DatabaseEngine databaseEngine)
             throws IOException, SQLException {
         final Path path = Paths.get("src/test/resources/seed_data.sql");
@@ -37,6 +59,14 @@ abstract class AbstractCrudTest extends AbstractTest {
         }
     }
 
+    /**
+     * Deletes test data from the database using an SQL script.
+     *
+     * @param databaseName   The name of the database.
+     * @param databaseEngine The {@link DatabaseEngine} to be used.
+     * @throws IOException  If an error occurs while reading the SQL script file.
+     * @throws SQLException If an error occurs while executing SQL queries.
+     */
     static void deleteData(final String databaseName, final DatabaseEngine databaseEngine)
             throws IOException, SQLException {
         final Path path = Paths.get("src/test/resources/delete_data.sql");
@@ -49,6 +79,11 @@ abstract class AbstractCrudTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests retrieval of all records from a given repository.
+     *
+     * @param repositoryClass The repository class to test.
+     */
     static void getAllTest(final Class<?> repositoryClass) {
         // Process repository
         ConsoleUtils.printFormatted("\n------ REPOSITORY PROCESSING PHASE ------\n");
@@ -78,6 +113,12 @@ abstract class AbstractCrudTest extends AbstractTest {
         }
     }
 
+    /**
+     * Tests deletion of a record by ID in a given repository.
+     *
+     * @param repositoryClass The repository class to test.
+     * @param id              The ID of the record to delete.
+     */
     static void deleteByIdTest(final Class<?> repositoryClass, final int id) {
         // Process repository
         ConsoleUtils.printFormatted("\n------ REPOSITORY PROCESSING PHASE ------\n");
@@ -105,6 +146,13 @@ abstract class AbstractCrudTest extends AbstractTest {
         }
     }
 
+    /**
+     * Builds a database connection string based on the database engine.
+     *
+     * @param databaseName   The name of the database.
+     * @param databaseEngine The {@link DatabaseEngine} to be used.
+     * @return The connection string for the specified database.
+     */
     private static String buildConnectionString(final String databaseName, final DatabaseEngine databaseEngine) {
         String projectRoot = Paths.get("").toAbsolutePath().toString();
         return switch (databaseEngine) {
@@ -114,6 +162,13 @@ abstract class AbstractCrudTest extends AbstractTest {
         };
     }
 
+    /**
+     * Executes a single SQL query within a given connection.
+     *
+     * @param query      The SQL query to execute.
+     * @param connection The database connection.
+     * @throws SQLException If an error occurs while executing the query.
+     */
     private static void executeQuery(final String query, final Connection connection) throws SQLException {
         try (final Statement statement = connection.createStatement()) {
             statement.executeUpdate(query);

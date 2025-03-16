@@ -12,8 +12,32 @@ import dimstyl.orm.metadata.DatabaseMetadata;
 import java.sql.Connection;
 import java.util.List;
 
+/**
+ * Abstract test class for testing the creation of database tables using ORM metadata.
+ * <p>
+ * This class is responsible for processing a given database class, generating SQL "CREATE TABLE" queries,
+ * and executing them within the appropriate database engine.
+ * </p>
+ *
+ * <p>Test Workflow:</p>
+ * <ol>
+ *     <li>Extract metadata from the provided database class.</li>
+ *     <li>Generate SQL "CREATE TABLE" queries.</li>
+ *     <li>Execute the generated queries within a database connection.</li>
+ * </ol>
+ *
+ * @see DatabaseProcessor
+ * @see SqlQueryGenerator
+ * @see SqlQueryExecutor
+ * @see DatabaseConfigurationFactory
+ */
 abstract class AbstractCreateTableTest extends AbstractTest {
 
+    /**
+     * Executes a test to create tables in the database based on the provided database class.
+     *
+     * @param databaseClass The class annotated as a database that contains table definitions.
+     */
     static void createDatabaseTest(final Class<?> databaseClass) {
         // Process database
         ConsoleUtils.printFormatted("\n------ DATABASE PROCESSING PHASE ------\n");

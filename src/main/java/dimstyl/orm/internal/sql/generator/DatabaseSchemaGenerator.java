@@ -12,10 +12,30 @@ import dimstyl.orm.metadata.TableMetadata;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Singleton-based SQL query generator responsible for creating database schema scripts.
+ * <p>
+ * This generator produces `CREATE TABLE` SQL queries based on metadata and supports different
+ * database engines such as H2, SQLite, and Derby.
+ * </p>
+ */
 public enum DatabaseSchemaGenerator implements SqlQueryGenerator<List<String>, DatabaseMetadata> {
 
+    /**
+     * The singleton instance of the database schema generator.
+     */
     INSTANCE;
 
+    /**
+     * Generates SQL `CREATE TABLE` queries based on {@link DatabaseMetadata}.
+     * <p>
+     * The generated queries are also saved as SQL script files based on the selected database engine.
+     * </p>
+     *
+     * @param databaseMetadata Metadata describing the database schema.
+     * @return A list of SQL `CREATE TABLE` statements as strings.
+     * @throws InvalidColumnNameException If any column in constraints does not exist in the table definition.
+     */
     @Override
     public List<String> generate(final DatabaseMetadata databaseMetadata) throws InvalidColumnNameException {
         final StringBuilder createTableQueriesBuilder = new StringBuilder();
@@ -30,7 +50,7 @@ public enum DatabaseSchemaGenerator implements SqlQueryGenerator<List<String>, D
 
         final String createTableQueries = createTableQueriesBuilder.toString();
 
-        // Save the generated SQL "CREATE TABLE" queries to a file specific to the database type
+        // Save the generated SQL "CREATE TABLE" queries to a file specific to the database engine
         try {
             final String fileNamePlaceholder = switch (databaseEngine) {
                 case H2 -> "db/h2/%s";
@@ -51,6 +71,14 @@ public enum DatabaseSchemaGenerator implements SqlQueryGenerator<List<String>, D
                 .toList();
     }
 
+    /**
+     * Generates an SQL `CREATE TABLE` query based on {@link TableMetadata} and {@link DatabaseEngine}.
+     *
+     * @param tableMetadata  The metadata for the table.
+     * @param databaseEngine The database engine for which the query is generated.
+     * @return The SQL `CREATE TABLE` query as a string.
+     * @throws InvalidColumnNameException If an invalid column name is referenced.
+     */
     private String generateCreateTableQuery(final TableMetadata tableMetadata, final DatabaseEngine databaseEngine)
             throws InvalidColumnNameException {
         final String tableName = tableMetadata.tableName();
@@ -72,6 +100,13 @@ public enum DatabaseSchemaGenerator implements SqlQueryGenerator<List<String>, D
         return sqlBuilder.toString();
     }
 
+    /**
+     * Appends column definitions to the SQL query based on the provided list of {@link ColumnMetadata}.
+     *
+     * @param sqlBuilder         The {@link StringBuilder} for the SQL query.
+     * @param columnMetadataList The list of column metadata.
+     * @return A set of column names used in the table.
+     */
     private Set<String> addColumnDefinitions(final StringBuilder sqlBuilder,
                                              final List<ColumnMetadata> columnMetadataList) {
         final List<String> columnDefinitions = new ArrayList<>();
@@ -101,6 +136,12 @@ public enum DatabaseSchemaGenerator implements SqlQueryGenerator<List<String>, D
         return tableColumnNames;
     }
 
+    /**
+     * Adds a `PRIMARY KEY` constraint to the SQL query if necessary.
+     *
+     * @param sqlBuilder  The {@link StringBuilder} for the SQL query.
+     * @param primaryKeys A list of primary key column names.
+     */
     private void addPrimaryKeyConstraint(final StringBuilder sqlBuilder, final List<String> primaryKeys) {
         if (!primaryKeys.isEmpty()) {
             sqlBuilder.append(",\n\tPRIMARY KEY (")
@@ -109,6 +150,15 @@ public enum DatabaseSchemaGenerator implements SqlQueryGenerator<List<String>, D
         }
     }
 
+    /**
+     * Adds `UNIQUE` constraints to the table definition based on {@link UniqueConstraint}.
+     *
+     * @param sqlBuilder        The {@link StringBuilder} for the SQL query.
+     * @param uniqueConstraints The array of unique constraints.
+     * @param tableColumnNames  The set of column names in the table.
+     * @param tableName         The name of the table.
+     * @throws InvalidColumnNameException If an invalid column name is referenced in the constraint.
+     */
     private void addUniqueConstraints(final StringBuilder sqlBuilder,
                                       final UniqueConstraint[] uniqueConstraints,
                                       final Set<String> tableColumnNames,
@@ -122,6 +172,15 @@ public enum DatabaseSchemaGenerator implements SqlQueryGenerator<List<String>, D
         }
     }
 
+    /**
+     * Validates that all columns referenced in a {@link UniqueConstraint} exist in the table.
+     *
+     * @param tableColumnNames The set of column names in the table.
+     * @param tableName        The name of the table.
+     * @param uniqueConstraint The unique constraint being validated.
+     * @return A list of valid column names for the unique constraint.
+     * @throws InvalidColumnNameException If a referenced column does not exist in the table.
+     */
     private List<String> validateConstraint(final Set<String> tableColumnNames,
                                             final String tableName,
                                             final UniqueConstraint uniqueConstraint) throws InvalidColumnNameException {
