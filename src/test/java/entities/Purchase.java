@@ -4,11 +4,11 @@ import dimstyl.orm.annotations.Column;
 import dimstyl.orm.annotations.PrimaryKey;
 import dimstyl.orm.annotations.Table;
 import dimstyl.orm.annotations.UniqueConstraint;
-import dimstyl.orm.marker.Entity;
+import dimstyl.orm.model.Entity;
+import lombok.ToString;
 
-import java.time.LocalDateTime;
-
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "created_at"}))
+@ToString
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"customer_id", "created_at"}))
 public class Purchase implements Entity {
 
     @PrimaryKey
@@ -16,9 +16,9 @@ public class Purchase implements Entity {
     private int id;
 
     @Column(nullable = false)
-    private Integer userId;
+    private Integer customerId;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt;
+    private String createdAt;
 
 }

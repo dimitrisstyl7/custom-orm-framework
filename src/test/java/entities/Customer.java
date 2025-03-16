@@ -3,10 +3,10 @@ package entities;
 import dimstyl.orm.annotations.Column;
 import dimstyl.orm.annotations.PrimaryKey;
 import dimstyl.orm.annotations.Table;
-import dimstyl.orm.marker.Entity;
+import dimstyl.orm.model.Entity;
+import lombok.ToString;
 
-import java.util.Date;
-
+@ToString
 @Table(name = "customer")
 public class Customer implements Entity {
 
@@ -23,7 +23,7 @@ public class Customer implements Entity {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(name = "date_of_birth")
-    private Date dateOfBirth;
+    @Column
+    private boolean active;
 
 }
