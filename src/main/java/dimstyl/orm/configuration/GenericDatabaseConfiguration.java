@@ -1,6 +1,6 @@
 package dimstyl.orm.configuration;
 
-import dimstyl.orm.enums.DatabaseType;
+import dimstyl.orm.enums.DatabaseEngine;
 import dimstyl.orm.exceptions.DatabaseConnectionException;
 import dimstyl.orm.utils.ConsoleUtils;
 import lombok.RequiredArgsConstructor;
@@ -16,20 +16,20 @@ import java.sql.SQLException;
 @RequiredArgsConstructor
 class GenericDatabaseConfiguration implements DatabaseConfiguration {
 
-    private final DatabaseType databaseType;
+    private DatabaseEngine databaseEngine;
     private Connection connection = null;
 
     @Override
     public void connect(String databaseName) throws DatabaseConnectionException {
         try {
-            ConsoleUtils.printFormatted("\n🔄️ Connecting to %s database '%s'...\n", databaseType, databaseName);
+            ConsoleUtils.printFormatted("\n🔄️ Connecting to %s database '%s'...\n", databaseEngine, databaseName);
             if (isConnected()) return;
-            if (databaseType == DatabaseType.SQLITE) ensureDirectoryExists("./db/sqlite");
             final String connectionString = buildConnectionString(databaseName);
+            if (databaseEngine == DatabaseEngine.SQLITE) ensureDirectoryExists("./db/sqlite");
             connection = DriverManager.getConnection(connectionString);
             ConsoleUtils.printFormatted("✅ Connection established successfully\n");
         } catch (SQLException | IOException e) {
-            ConsoleUtils.printFormatted("⚠️ Could not connect to %s database '%s'\n\tERROR: %s\n", databaseType, databaseName, e.getMessage());
+            ConsoleUtils.printFormatted("⚠️ Could not connect to %s database '%s'\n\tERROR: %s\n", databaseEngine, databaseName, e.getMessage());
             throw new DatabaseConnectionException(e.getMessage(), e);
         }
     }
@@ -38,9 +38,9 @@ class GenericDatabaseConfiguration implements DatabaseConfiguration {
     public void close() throws DatabaseConnectionException {
         try {
             if (isConnected()) {
-                ConsoleUtils.printFormatted("\n🔄️ Closing %s connection...\n", databaseType);
+                ConsoleUtils.printFormatted("\n🔄️ Closing %s connection...\n", databaseEngine);
                 connection.close();
-                ConsoleUtils.printFormatted("✅ %s connection closed\n", databaseType);
+                ConsoleUtils.printFormatted("✅ %s connection closed\n", databaseEngine);
                 connection = null;
             }
         } catch (SQLException e) {

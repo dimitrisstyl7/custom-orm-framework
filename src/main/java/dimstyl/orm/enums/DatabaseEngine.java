@@ -1,6 +1,6 @@
 package dimstyl.orm.enums;
 
-public enum DatabaseType {
+public enum DatabaseEngine {
 
     H2, SQLITE, DERBY;
 

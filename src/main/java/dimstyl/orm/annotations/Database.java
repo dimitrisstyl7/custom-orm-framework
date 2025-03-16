@@ -1,7 +1,7 @@
 package dimstyl.orm.annotations;
 
-import dimstyl.orm.enums.DatabaseType;
-import dimstyl.orm.marker.Entity;
+import dimstyl.orm.enums.DatabaseEngine;
+import dimstyl.orm.model.Entity;
 
 import java.lang.annotation.*;
 
@@ -12,7 +12,7 @@ public @interface Database {
 
     String name() default "";
 
-    DatabaseType type();
+    DatabaseEngine engine();
 
     Class<? extends Entity>[] tables() default {};
 
