@@ -7,5 +7,5 @@ public record ColumnMetadata(String columnName,
                              String columnType,
                              boolean primaryKey,
                              boolean nullable,
-                             boolean unique) {
+                             boolean unique) implements Metadata {
 }
