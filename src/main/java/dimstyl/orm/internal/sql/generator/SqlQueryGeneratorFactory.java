@@ -14,12 +14,6 @@ import dimstyl.orm.metadata.Metadata;
  *     <li>{@code DELETE_BY_ID} - Uses {@link DeleteByIdQueryGenerator#INSTANCE}</li>
  * </ul>
  * </p>
- *
- * <p><strong>Usage Example:</strong></p>
- * <pre>
- *     SqlQueryGenerator&lt;List<String>, DatabaseMetadata&gt; generator =
- *                  SqlQueryGeneratorFactory.getGenerator(SqlOperation.CREATE_TABLE);
- * </pre>
  */
 public final class SqlQueryGeneratorFactory {
 

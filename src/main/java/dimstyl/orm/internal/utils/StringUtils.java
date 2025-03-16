@@ -8,21 +8,6 @@ import java.util.Map;
  * <p>This class provides helper methods to convert strings between different naming conventions and to generate
  * formatted representations of supported Java-to-SQL type mappings.</p>
  *
- * <p><strong>Usage Example:</strong></p>
- * <pre>
- *     // Convert camelCase to snake_case
- *     String snakeCase = StringUtils.camelCaseToSnakeCase("myVariableName");
- *     System.out.println(snakeCase); // Output: my_variable_name
- *
- *     // Get formatted data type mappings for a database engine
- *     Map<Class<?>, String> typeMap = Map.of(
- *         String.class, "VARCHAR(255)",
- *         Integer.class, "INTEGER"
- *     );
- *     String formattedTypes = StringUtils.getSupportedDataTypes("H2", typeMap);
- *     System.out.println(formattedTypes); // Output: formatted type mappings for H2
- * </pre>
- *
  * <p><strong>Design Notes:</strong></p>
  * <ul>
  *     <li>This class is {@code final} to prevent inheritance.</li>
